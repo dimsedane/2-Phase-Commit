@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>2PC Client Interface</title>
+    <!-- Bootstrap -->
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    
+    <script src="http://localhost/socket.io/socket.io.js"></script>
+    <script>
+        function randomFromInterval(from,to){
+            return Math.floor(Math.random()*(to-from+1)+from);
+        }
+    
+        var socket = io.connect('http://localhost');
+        
+        var prepareNews = '';
+        
+        socket.emit('client',{});
+        
+        socket.on('prepare', function (data) {
+            prepareNews = data.news;
+            setTimeout(function(){socket.emit('yes',{});},randomFromInterval(500,3000));
+        });
+        
+        socket.on('commit', function (data) {
+            setTimeout(function(){
+                $('#heroBody').html(prepareNews);
+                socket.emit('ack',{});
+            },randomFromInterval(500,3000));
+        });
+</script>
+  </head>
+  <body>
+  <div class="container">
+    <div style="margin-top:10%" class="hero-unit">
+            <h1>2 Phase Commit</h1>
+            <p>The latest news from the server:</p>
+            <p id="heroBody">No news yet...</p>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>2PC Coordintor Interface</title>
+    <!-- Bootstrap -->
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    
+    <script src="http://localhost/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io.connect('http://localhost');
+        
+        socket.emit('coordinator',{});
+        
+        socket.on('newClient', function (data) {
+            var row = '<tr id="clientRow';
+            row += data.client;
+            row += '" class="info"><td>';
+            row += data.client;
+            row += '</td><td>Connected</td></tr>';
+            
+            $('#table').append(row);
+        });
+        
+        socket.on('clientDisconnect',function(data){
+            $('#clientRow'+data.client).remove();
+        });
+        
+        socket.on('yes',function(data){
+            $('#clientRow'+data.client).removeClass('info');
+            $('#clientRow'+data.client).addClass('warning');
+        });
+        
+        socket.on('ack',function(data){
+            $('#clientRow'+data.client).removeClass('warning');
+            $('#clientRow'+data.client).addClass('success');
+            
+        });
+        
+        $(document).ready(function(){
+            $('#prepareButton').click(function(){
+                $('[id^="clientRow"]').removeClass('success');
+                $('[id^="clientRow"]').addClass('info');
+                socket.emit('prepare',{news: $('#newsField').val()});
+            });
+        })
+</script>
+  </head>
+  <body>
+  <div class="container">
+    <h1>Connected Clients</h1>
+    <input id="newsField" type="text" /> <button id="prepareButton" class="btn">Send Prepare</button>
+    <table id="table" class="table">
+        <thead>
+            <tr><th>Client Id</th><th>Status</th></tr>
+        </thead>
+    </table>
+  </div>
+  </body>
+</html>
